@@ -31,7 +31,7 @@ jobs:
           echo "tag=${DESCRIBE_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python for wheel pre-download
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.13"
 
