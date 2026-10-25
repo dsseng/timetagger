@@ -55,14 +55,15 @@ RUN groupadd -g 1000 timetagger && \
     useradd -r -u 1000 -m -g timetagger timetagger && \
     mkdir -p /opt/timetagger/data && \
     chown -R timetagger:timetagger /opt/timetagger && \
-    find /etc/passwd /etc/group /etc/shadow /etc/gshadow /home/timetagger /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
+    find /etc/passwd /etc/group /etc/shadow /etc/gshadow /home /opt /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} + && \
+    touch -d "@${SOURCE_DATE_EPOCH}" /etc
 
 WORKDIR /opt/timetagger
 COPY --from=builder --chown=timetagger:timetagger /install/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder --chown=timetagger:timetagger /build/timetagger /opt/timetagger/app
 
 RUN find /usr/local/lib/python3.13/site-packages -exec touch -d "@${SOURCE_DATE_EPOCH}" {} + && \
-    find /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
+    find /opt /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
 
 # Switch to unpriviliged user
 USER 1000
