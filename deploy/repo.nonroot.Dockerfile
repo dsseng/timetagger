@@ -22,6 +22,7 @@ RUN python -m pip install \
       --no-index \
       --find-links=/build/vendor \
       --require-hashes \
+      --no-compile \
       -r requirements.lock \
       --target /install/site-packages
 
@@ -36,10 +37,13 @@ RUN cd /build/timetagger && \
       --no-deps \
       --target /install/site-packages \
       --no-compile \
-      .
+      . && \
+    rm -rf /build/timetagger/build /build/timetagger/*.egg-info
 
-RUN python -m compileall -b --invalidation-mode=unchecked-hash /install/site-packages && \
-    find /install/site-packages -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
+RUN python -m compileall -f -b --invalidation-mode=unchecked-hash /install/site-packages && \
+    find /install/site-packages -exec touch -d "@${SOURCE_DATE_EPOCH}" {} + && \
+    find /build/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
+
 
 FROM python:3.13.16-slim-trixie@sha256:70729b46c69b4f1e97c4822c1af3df53a1476cf5ddc6c087c0c10bc3a5678c2f
 
@@ -51,14 +55,14 @@ RUN groupadd -g 1000 timetagger && \
     useradd -r -u 1000 -m -g timetagger timetagger && \
     mkdir -p /opt/timetagger/data && \
     chown -R timetagger:timetagger /opt/timetagger && \
-    find /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
+    find /etc/passwd /etc/group /etc/shadow /etc/gshadow /home/timetagger /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
 
 WORKDIR /opt/timetagger
 COPY --from=builder --chown=timetagger:timetagger /install/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder --chown=timetagger:timetagger /build/timetagger /opt/timetagger/app
 
-RUN find /usr/local/lib/python3.13/site-packages -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
-RUN find /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
+RUN find /usr/local/lib/python3.13/site-packages -exec touch -d "@${SOURCE_DATE_EPOCH}" {} + && \
+    find /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
 
 # Switch to unpriviliged user
 USER 1000
