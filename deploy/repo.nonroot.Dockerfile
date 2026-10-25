@@ -35,25 +35,30 @@ RUN cd /build/timetagger && \
       --find-links=/build/vendor \
       --no-deps \
       --target /install/site-packages \
+      --no-compile \
       .
 
-RUN python -m compileall -b --invalidation-mode=unchecked-hash /install/site-packages
+RUN python -m compileall -b --invalidation-mode=unchecked-hash /install/site-packages && \
+    find /install/site-packages -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
 
 FROM python:3.13.16-slim-trixie@sha256:70729b46c69b4f1e97c4822c1af3df53a1476cf5ddc6c087c0c10bc3a5678c2f
+
+ARG SOURCE_DATE_EPOCH=0
+ENV SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
 
 # Create unpriviliged user and group, including directory structure
 RUN groupadd -g 1000 timetagger && \
     useradd -r -u 1000 -m -g timetagger timetagger && \
     mkdir -p /opt/timetagger/data && \
-    chown -R timetagger:timetagger /opt/timetagger
+    chown -R timetagger:timetagger /opt/timetagger && \
+    find /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
 
 WORKDIR /opt/timetagger
 COPY --from=builder --chown=timetagger:timetagger /install/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder --chown=timetagger:timetagger /build/timetagger /opt/timetagger/app
 
-ARG SOURCE_DATE_EPOCH=0
-ENV SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
 RUN find /usr/local/lib/python3.13/site-packages -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
+RUN find /opt/timetagger -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
 
 # Switch to unpriviliged user
 USER 1000
