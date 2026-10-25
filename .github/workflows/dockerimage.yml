@@ -69,6 +69,12 @@ jobs:
             # set latest-nonroot tag for default branch
             type=raw,value=latest-nonroot
 
+      - name: Get mtime
+        id: epoch
+        run: |
+          EPOCH="$(git log -1 --pretty=%ct)"
+          echo "epoch=$EPOCH" >> "$GITHUB_OUTPUT"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
@@ -77,5 +83,8 @@ jobs:
           file: deploy/repo.nonroot.Dockerfile
           push: true
           network: none
+          build-args: |
+            SOURCE_DATE_EPOCH=${{ steps.epoch.outputs.epoch }}
+          output: type=image,push=true,rewrite-timestamp=true
           tags: ${{ steps.meta-nonroot.outputs.tags }}
           labels: ${{ steps.meta-nonroot.outputs.labels }}
