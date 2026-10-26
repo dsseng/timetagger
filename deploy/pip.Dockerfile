@@ -11,7 +11,7 @@
 # mypaas.maxmem = 256m
 # mypaas.env = TIMETAGGER_CREDENTIALS
 
-FROM python:3.13-slim-bookworm
+FROM python:3.15-slim-bookworm
 
 # Install dependencies (including optional ones that make uvicorn faster)
 RUN pip --no-cache-dir install pip --upgrade && pip --no-cache-dir install \
