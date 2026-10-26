@@ -1,7 +1,7 @@
 # Dockerfile to build an image from the repo, suited for the Raspberry-pi
 # Note that the build context must be the root of the repo.
 
-FROM python:3.10-slim-bullseye
+FROM python:3.13-slim-bullseye
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CRYPTOGRAPHY_DONT_BUILD_RUST=1
