@@ -7,4 +7,4 @@ jinja2
 markdown
 bcrypt
 iptools
-setuptools>=84.2.0
+setuptools>=84.2.1
